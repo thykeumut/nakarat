@@ -643,8 +643,17 @@ document.querySelectorAll("#genres .cat").forEach(b=>b.onclick=()=>{
 });
 
 /* YouTube IFrame API — karaoke oynatıcısı + oyun parçacığı */
-let player=null, ytReady=false, qAcc=null;
+let player=null, ytReady=false, qAcc=null, qAdPoll=null;
 let kPlayer=null, kReady=false, kPending=null, kTimer=null, shownDur=0;
+/* ═══════ reklam dedektörü-atlayıcı: içerikler hep >1dk olduğundan kısa süre = reklam.
+   seekTo ile reklamı sonuna zorlarız → YouTube tadil değil atlanır. ═══════ */
+function trySkipAd(pl){
+  try{
+    const d=pl.getDuration()||0;
+    if(d>0 && d<60){ pl.seekTo(Math.max(0,d-0.6), true); return true; }
+  }catch(_){}
+  return false;
+}
 const tag=document.createElement("script");
 tag.src="https://www.youtube.com/iframe_api";
 document.head.appendChild(tag);
@@ -670,7 +679,8 @@ window.onYouTubeIframeAPIReady=()=>{
           kTimer=setInterval(()=>{
             try{
               const d=kPlayer.getDuration()||0, c=kPlayer.getCurrentTime()||0;
-              if(d){ shownDur=d; kSeek.value=Math.round(c/d*1000); }
+              if(d && d<60){ kTime.textContent="Reklam atlanıyor…"; trySkipAd(kPlayer); return; }
+              if(d){ shownDur=d; kSeek.value=Math.round(Math.min(1,c/d)*1000); }
               kTime.textContent=fmt(c)+" / "+fmt(d);
             }catch(_){}
           },250);
@@ -802,9 +812,19 @@ function listen(){
   document.getElementById("qCtrl").style.display="flex";
   qPBtn.textContent="Durdur"; qProg.value=0; qLeft.textContent="0:12";
   const c=document.getElementById("cover");
-  c.innerHTML=`<div class="eqbars"><i></i><i></i><i></i><i></i><i></i></div><p><b>Dinliyorsun…</b></p><p class="dim">Duraklatmak için kumandadaki düğmeyi kullan — tahmin için şıkları seç.</p>`;
+  c.innerHTML=`<div class="eqbars"><i></i><i></i><i></i><i></i><i></i></div><p><b>Yükleniyor…</b></p><p class="dim" id="adHint">Reklam gelirse saniyeler içinde atlıyoruz 👋</p>`;
   player.loadVideoById({videoId:cur.v, startSeconds:cur.s||0});
   player.playVideo();
+  /* reklam gözcüsü: kısa süreli içerik yakalanırsa sonuna zorla → atlanır */
+  try{clearInterval(qAdPoll);}catch(_){}
+  qAdPoll=setInterval(()=>{
+    if(trySkipAd(player)){
+      const h=document.getElementById("adHint");
+      if(h) h.textContent="Reklam atlandı — parça geliyor…";
+      clearInterval(qAdPoll);
+    }
+  },500);
+  setTimeout(()=>{try{clearInterval(qAdPoll);}catch(_){}},45000);
 }
 window.listen=listen;
 

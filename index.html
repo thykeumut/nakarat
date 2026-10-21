@@ -303,7 +303,7 @@
     <div class="how">
       <div class="n">02 — OYUN</div>
       <b>Dinle &amp; Bil</b>
-      <p>Rastgele bir şarkıdan 12 saniyelik parça çalar. Video saklanır, sadece ses eşliğinde 4 şıktan doğruyu bulursun.</p>
+      <p>Rastgele bir şarkıdan 12 saniyelik parça çalar. Video saklanır, sadece ses eşliğinde 6 şıktan doğruyu bulursun — şıklar aynı sanatçı ve türden seçilir.</p>
     </div>
     <div class="how">
       <div class="n">03 — HAVUZ</div>
@@ -371,6 +371,7 @@
     <button class="cat m" data-g="pop">Pop</button>
     <button class="cat m" data-g="rap">Rap</button>
     <button class="cat m" data-g="rock">Rock</button>
+    <button class="cat m" data-g="halk">Halk</button>
   </div>
 
   <div class="scorebar">
@@ -456,7 +457,7 @@ document.querySelectorAll(".nt").forEach(b=>b.onclick=()=>goTo(b.dataset.p));
 
 /* ═══════ KARAOKE ═══════ */
 
-let karaoke = JSON.parse(localStorage.getItem("nakaratKaraokeV7")||"null") || [
+let karaoke = JSON.parse(localStorage.getItem("nakaratKaraokeV8")||"null") || [
   { v:"ynFWktu90fc", t:"Kuzu Kuzu",             a:"Tarkan",        l:"tr" },
   { v:"IH2liCEJJmE", t:"Dudu",                  a:"Tarkan",        l:"tr" },
   { v:"frYrLJYi08A", t:"Şımarık",               a:"Tarkan",        l:"tr" },
@@ -482,6 +483,34 @@ let karaoke = JSON.parse(localStorage.getItem("nakaratKaraokeV7")||"null") || [
   { v:"9UgohPoBaqQ", t:"Başa Bela",              a:"Ezhel",         l:"tr" },
   { v:"sDdZXy6odM0", t:"AYA",                    a:"Murda & Ezhel", l:"tr" },
   { v:"QAutTySqz9A", t:"Holocaust",              a:"Ceza",          l:"tr" },
+  { v:"U3BKMDbzV8s", t:"Loser",                  a:"Tame Impala",   l:"gl" },
+  { v:"yshr6cCCIdY", t:"Işıklı Yol",             a:"İzel",          l:"tr" },
+  { v:"6mtrbEid0zY", t:"Yalan",                  a:"Candan Erçetin",l:"tr" },
+  { v:"xJiqFi_HqLM", t:"Pus",                    a:"Sufle",         l:"tr" },
+  { v:"MDp4Ee3x7wc", t:"Misafir",                a:"Simge",         l:"tr" },
+  { v:"BTzQZqNTUpc", t:"Gamsız Hayat",           a:"Candan Erçetin",l:"tr" },
+  { v:"XIkPYGA20W8", t:"Güm Güm",                a:"Ayşe Hatun Önal",l:"tr" },
+  { v:"SwdWOUoSZxs", t:"Cerrahpaşa",             a:"Volkan Konak",  l:"tr" },
+  { v:"sWF9B5qlBcg", t:"Mimoza Çiçeğim",         a:"Volkan Konak",  l:"tr" },
+  { v:"9oPZE6t64lQ", t:"İncir",                  a:"İlyas Yalçıntaş",l:"tr" },
+  { v:"dJyNL4uKvCQ", t:"Ne Ağlarsın",            a:"Özdemir Erdoğan",l:"tr" },
+  { v:"60TyaBC7s7A", t:"Söyle Sunam",            a:"Nurettin Rençber",l:"tr" },
+  { v:"5VYKF7OrtYY", t:"Dağlara Mı Yazdın",      a:"Songül Güner",  l:"tr" },
+  { v:"FRzMUVsX28s", t:"Ruhumda Sızı",           a:"Ender Balkır",  l:"tr" },
+  { v:"Zh7-9X1TGLc", t:"O Yar Gelir",            a:"Aynur Haşhaş",  l:"tr" },
+  { v:"QRQ8uVC7E7o", t:"Yaparım Bilirsin",       a:"Ebru Gündeş",   l:"tr" },
+  { v:"wXOHgOskILE", t:"Unutamam Seni",          a:"Murat Göğebakan",l:"tr" },
+  { v:"z0GgpAx5z2I", t:"Diğer Yarım",            a:"Murat Göğebakan",l:"tr" },
+  { v:"mE5S2oAQziM", t:"Gülpembe",               a:"Barış Manço",   l:"tr" },
+  { v:"IBLOk9t0oZo", t:"Dönence",                a:"Barış Manço",   l:"tr" },
+  { v:"pgOeuRNHob4", t:"Alla Beni Pulla Beni",   a:"Barış Manço",   l:"tr" },
+  { v:"hb4ittxyXus", t:"Hiç Işık Yok",           a:"No.1 & Melek Mosso",l:"tr" },
+  { v:"apJjLXXYfPY", t:"Yerli Plaka",            a:"Ceza",          l:"tr" },
+  { v:"WjRe_oheFuA", t:"Ölü",                    a:"Contra",        l:"tr" },
+  { v:"KDsdquY2XzQ", t:"Bir Çift Göz",           a:"Norm Ender & Ebru Gündeş",l:"tr" },
+  { v:"pY4l1qMgrG4", t:"Pazarlık M'olur",        a:"Kızılırmak",    l:"tr" },
+  { v:"0v9BkF2mOEg", t:"Sevda Değil",            a:"Çetin İçten",   l:"tr" },
+  { v:"kvQG0iaaRZk", t:"Bak",                    a:"Pilli Bebek",   l:"tr" },
   { v:"F-p2BQ4H1nA", t:"Lose Yourself",         a:"Eminem",        l:"gl" },
   { v:"xyF04rAhHaQ", t:"Bohemian Rhapsody",     a:"Queen",         l:"gl" },
   { v:"f41XKolO1CM", t:"Levitating",            a:"Dua Lipa",      l:"gl" },
@@ -498,7 +527,7 @@ let karaoke = JSON.parse(localStorage.getItem("nakaratKaraokeV7")||"null") || [
   { v:"rMSQwIp4Jg8", t:"Someone Like You",      a:"Adele",         l:"gl" },
 ];
 let kLang = "mix", kSel = null;
-const saveK=()=>localStorage.setItem("nakaratKaraokeV7",JSON.stringify(karaoke));
+const saveK=()=>localStorage.setItem("nakaratKaraokeV8",JSON.stringify(karaoke));
 
 document.querySelectorAll("#kLangs .cat").forEach(b=>b.onclick=()=>{
   kLang=b.dataset.l;
@@ -554,8 +583,8 @@ document.getElementById("kAdd").onclick=()=>{
 renderSongs();
 
 /* ═══════ OYUN ═══════ */
-const QK="nakaratQuizV3", HK="nakaratHi";
-let pool = JSON.parse(localStorage.getItem("nakaratQuizV3")||"null") || [
+const QK="nakaratQuizV4", HK="nakaratHi";
+let pool = JSON.parse(localStorage.getItem("nakaratQuizV4")||"null") || [
   { v:"NAHRpEqgcL4", t:"Kuzu Kuzu",         a:"Tarkan",    l:"tr", g:"pop",  s:30 },
   { v:"mq_ReSbqX7E", t:"Firuze",            a:"Sezen Aksu",l:"tr", g:"pop",  s:35 },
   { v:"iurfbuXpqXM", t:"Geceler",           a:"Ezhel",     l:"tr", g:"rap",  s:15 },
@@ -569,9 +598,38 @@ let pool = JSON.parse(localStorage.getItem("nakaratQuizV3")||"null") || [
   { v:"dvgZkm1xWPE", t:"Viva La Vida",      a:"Coldplay",  l:"gl", g:"rock", s:20 },
   { v:"7wtfhZwyrcc", t:"Believer",          a:"Imagine Dragons",l:"gl", g:"rock", s:30 },
   { v:"YQHsXMglC9A", t:"Hello",             a:"Adele",     l:"gl", g:"pop",  s:35 },
+  { v:"CCOHfYX4R9c", t:"Işıklı Yol",        a:"İzel",      l:"tr", g:"pop",  s:25 },
+  { v:"zlviStCMzFk", t:"Yalan",             a:"Candan Erçetin",l:"tr", g:"pop",  s:30 },
+  { v:"9dQAWxxWTVI", t:"Pus",               a:"Sufle",     l:"tr", g:"pop",  s:20 },
+  { v:"sDcmjMT8raY", t:"Misafir",           a:"Simge",     l:"tr", g:"pop",  s:25 },
+  { v:"H450BoeBA8c", t:"Gamsız Hayat",      a:"Candan Erçetin",l:"tr", g:"pop",  s:30 },
+  { v:"JGOfDctPKRo", t:"Güm Güm",           a:"Ayşe Hatun Önal",l:"tr", g:"pop",  s:20 },
+  { v:"z4UE5WzBSOU", t:"Cerrahpaşa",        a:"Volkan Konak",l:"tr", g:"halk", s:35 },
+  { v:"HjJdZsN_tQk", t:"Mimoza Çiçeğim",    a:"Volkan Konak",l:"tr", g:"halk", s:35 },
+  { v:"9pZs5RQMVlE", t:"İncir",             a:"İlyas Yalçıntaş",l:"tr", g:"pop",  s:30 },
+  { v:"nLu6opUwVOk", t:"Ne Ağlarsın",       a:"Özdemir Erdoğan",l:"tr", g:"halk", s:40 },
+  { v:"mogx5OcUcR4", t:"Söyle Sunam",       a:"Nurettin Rençber",l:"tr", g:"halk", s:35 },
+  { v:"zK94zqNMeq0", t:"Dağlara Mı Yazdın", a:"Songül Güner",l:"tr", g:"halk", s:30 },
+  { v:"lyk1uEJBxis", t:"Ruhumda Sızı",      a:"Ender Balkır",l:"tr", g:"halk", s:30 },
+  { v:"mqP6gden72A", t:"O Yar Gelir",       a:"Aynur Haşhaş",l:"tr", g:"halk", s:25 },
+  { v:"Z8FizcVEiJY", t:"Yaparım Bilirsin",  a:"Ebru Gündeş",l:"tr", g:"pop",  s:25 },
+  { v:"mps1eJOStvQ", t:"Unutamam Seni",     a:"Murat Göğebakan",l:"tr", g:"rock", s:30 },
+  { v:"ijTkfzCv_Is", t:"Diğer Yarım",       a:"Murat Göğebakan",l:"tr", g:"rock", s:30 },
+  { v:"zd8IFDgQCUc", t:"Gülpembe",          a:"Barış Manço",l:"tr", g:"rock", s:30 },
+  { v:"77ygz-MC6_8", t:"Dönence",           a:"Barış Manço",l:"tr", g:"rock", s:35 },
+  { v:"GUKIEjmQ1Bc", t:"Alla Beni Pulla Beni",a:"Barış Manço",l:"tr", g:"rock", s:25 },
+  { v:"5PnEC4__CyM", t:"Hiç Işık Yok",      a:"No.1 & Melek Mosso",l:"tr", g:"rap",  s:20 },
+  { v:"n7_ObtKRZfA", t:"Yerli Plaka",       a:"Ceza",      l:"tr", g:"rap",  s:15 },
+  { v:"GAt8sVeFM_c", t:"Sınama Beni Yeter", a:"Tahribad-ı İsyan",l:"tr", g:"rap",  s:15 },
+  { v:"GH6MB7YH-Bg", t:"Ölü",               a:"Contra",    l:"tr", g:"rap",  s:20 },
+  { v:"eu7o5wMl2fw", t:"Bak",               a:"Pilli Bebek",l:"tr", g:"rock", s:25 },
+  { v:"qDxfNmR95dM", t:"Bir Çift Göz",      a:"Norm Ender & Ebru Gündeş",l:"tr", g:"rap",  s:20 },
+  { v:"cclAQ2e8in0", t:"Pazarlık M'olur",   a:"Kızılırmak",l:"tr", g:"halk", s:30 },
+  { v:"6uifr5-Xr6I", t:"Sevda Değil",       a:"Çetin İçten",l:"tr", g:"halk", s:30 },
+  { v:"s3a4OQR-10M", t:"Loser",             a:"Tame Impala",l:"gl", g:"rock", s:40 },
 ];
 let lang="mix", genre="all", score=0, streak=0, qn=0, cur=null, lock=false;
-const saveQ=()=>localStorage.setItem("nakaratQuizV3",JSON.stringify(pool));
+const saveQ=()=>localStorage.setItem("nakaratQuizV4",JSON.stringify(pool));
 
 document.querySelectorAll("#langs .cat").forEach(b=>b.onclick=()=>{
   lang=b.dataset.l;
@@ -710,14 +768,22 @@ function nextQ(){
   document.getElementById("opts").innerHTML="";
 
   let list = lang==="mix"? pool : pool.filter(x=>x.l===lang);
-  if(genre!=="all"){ const g=list.filter(x=>x.g===genre); if(g.length>=4) list=g; }
-  if(list.length<4){
+  if(genre!=="all"){ const g=list.filter(x=>x.g===genre); if(g.length>=6) list=g; }
+  if(list.length<6){
     document.getElementById("qNote").innerHTML="<b>Bu kategoride yeterli soru yok</b> — aşağıdan kendi sorunuzu ekleyin.";
     return;
   }
   cur=list[Math.floor(Math.random()*list.length)];
-  const others=pool.filter(x=>x.v!==cur.v).sort(()=>Math.random()-.5).slice(0,3);
-  const usage=[cur,...others].sort(()=>Math.random()-.5);
+  /* ═══════ zorlu çeldiriciler: 5 yanlış şık ≈ aynı dil → aynı tür → aynı sanatçı öncelikli ═══════ */
+  const sh=a=>[...a].sort(()=>Math.random()-.5);
+  const used=new Set([cur.v]);
+  const others=[];
+  const take=arr=>{ for(const p of sh(arr)){ if(others.length>=5) break; if(!used.has(p.v)){ others.push(p); used.add(p.v); } } };
+  take(pool.filter(x=>x.v!==cur.v && x.a===cur.a));                                  /* aynı sanatçı — en sinsi */
+  take(pool.filter(x=>x.l===cur.l && x.g===cur.g));                                  /* aynı tür */
+  take(pool.filter(x=>x.l===cur.l));                                                 /* aynı dil */
+  take(pool.filter(x=>x.v!==cur.v));                                                 /* kalanlar */
+  const usage=sh([cur,...others]);
   qn++; document.getElementById("qNum").textContent=qn;
   document.getElementById("opts").innerHTML=usage.map(o=>
     `<button class="opt" data-v="${o.v}">${esc(o.t)} — ${esc(o.a)}</button>`).join("");
@@ -727,7 +793,7 @@ function nextQ(){
 function buildCover(){
   const c=document.getElementById("cover");
   c.style.display="flex";
-  c.innerHTML=`<div class="q">♪</div><p>Sakın bakma, sadece dinle — parça çalınca 4 şıktan hangisi olduğunu bul.</p><button class="btn" style="margin-top:14px;" onclick="listen()">Dinle</button>`;
+  c.innerHTML=`<div class="q">♪</div><p>Sakın bakma, sadece dinle — parça çalınca 6 şıktan hangisi olduğunu bul.</p><button class="btn" style="margin-top:14px;" onclick="listen()">Dinle</button>`;
 }
 function listen(){
   if(!cur) return;

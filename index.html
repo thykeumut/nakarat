@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAKARAT — Karaoke · Dinle &amp; Bil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f6f3ee; --surface:#ffffff; --ink:#16161e; --muted:#77717f;
+    --line:rgba(22,22,30,.10); --line-soft:rgba(22,22,30,.06);
+    --a1:#ff5d3a; --a2:#ffb638; --a3:#e6397e;
+    --grad:linear-gradient(90deg,#ff5d3a,#ffb638);
+    --dark:#181820; --shadow:0 10px 30px rgba(22,22,30,.08);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif; color:var(--ink);
+    background:
+      radial-gradient(1000px 500px at 92% -10%, rgba(255,93,58,.09), transparent 70%),
+      radial-gradient(800px 420px at -8% 0%, rgba(230,57,126,.06), transparent 70%),
+      var(--bg);
+  }
+  button { font-family:inherit; }
+  ::selection { background:var(--a1); color:#fff; }
+
+  nav {
+    position:fixed; inset:0 0 auto 0; z-index:40; display:flex; align-items:center; gap:14px;
+    padding:13px 26px; background:rgba(246,243,238,.8); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .logo { font-weight:800; letter-spacing:3px; font-size:1.05rem; color:var(--ink); }
+  .logo em { font-style:normal; color:var(--a1); }
+  nav .tabs { display:flex; gap:6px; margin-left:auto; }
+  .nt {
+    padding:9px 18px; border-radius:999px; border:1px solid transparent;
+    background:transparent; color:var(--muted); cursor:pointer; font-size:.87rem; font-weight:500; transition:.2s;
+  }
+  .nt:hover { color:var(--ink); }
+  .nt.on {
+    background:var(--dark); color:#fff; font-weight:700;
+    box-shadow:0 8px 20px rgba(22,22,30,.25);
+  }
+
+  .page { display:none; padding:92px 26px 60px; max-width:1000px; margin:0 auto; }
+  .page.on { display:block; animation:fade .3s; }
+  @keyframes fade { from{ opacity:0; transform:translateY(8px);} }
+  h1.big { font-size:clamp(1.9rem,4.5vw,2.7rem); font-weight:800; letter-spacing:-1px; }
+  .sub { color:var(--muted); margin-top:8px; line-height:1.6; }
+  .note-ish { color:var(--muted); font-size:.76rem; margin-top:10px; line-height:1.55; }
+
+  .panel { background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:22px; margin-top:22px; box-shadow:var(--shadow); }
+  .field { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+  .field input, .field select {
+    flex:1 1 170px; padding:12px 14px; border-radius:11px;
+    background:#faf8f4; border:1px solid var(--line);
+    color:var(--ink); outline:none; font-size:.9rem;
+  }
+  .field input:focus, .field select:focus { border-color:var(--a1); box-shadow:0 0 0 3px rgba(255,93,58,.15); }
+  .btn {
+    padding:12px 24px; border-radius:999px; font-weight:700; font-size:.9rem;
+    cursor:pointer; border:none; color:#fff; background:var(--grad); transition:.2s;
+    box-shadow:0 8px 20px rgba(255,93,58,.3);
+  }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 12px 26px rgba(255,93,58,.38); }
+  .btn.ghost { background:var(--surface); border:1px solid var(--line); color:var(--ink); box-shadow:none; }
+  .btn.ghost:hover { background:#faf8f4; }
+
+  /* ── ana sayfa ── */
+  .homehero { text-align:center; padding:44px 0 10px; }
+  .badge {
+    width:fit-content; margin:0 auto 18px; padding:6px 15px; border-radius:999px;
+    font-size:.76rem; letter-spacing:.04em; color:var(--a1);
+    border:1px solid rgba(255,93,58,.3); background:rgba(255,93,58,.07);
+  }
+  .homehero h1 { font-size:clamp(2.2rem,5.2vw,3.6rem); font-weight:800; letter-spacing:-1.5px; line-height:1.12; }
+  .homehero h1 span {
+    background:linear-gradient(90deg,#ff5d3a,#e6397e 60%,#ffb638);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .homehero p.lead { color:var(--muted); margin:16px auto 0; max-width:460px; line-height:1.7; font-size:.98rem; }
+  .ctarow { display:flex; gap:12px; justify-content:center; margin-top:26px; flex-wrap:wrap; }
+  .stats { display:flex; gap:12px; flex-wrap:wrap; margin-top:34px; }
+  .stat {
+    flex:1 1 140px; background:var(--surface); border:1px solid var(--line-soft);
+    border-radius:16px; padding:18px 12px; text-align:center; box-shadow:var(--shadow);
+  }
+  .stat b {
+    display:block; font-size:1.9rem; font-weight:800;
+    background:linear-gradient(90deg,#ff5d3a,#e6397e);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .stat span { color:var(--muted); font-size:.78rem; letter-spacing:.05em; }
+  .howto { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin-top:14px; }
+  .how { background:var(--surface); border:1px solid var(--line-soft); border-radius:16px; padding:20px; box-shadow:var(--shadow); }
+  .how .n { color:var(--a1); font-size:.76rem; font-weight:800; letter-spacing:2px; }
+  .how b { color:var(--ink); display:block; margin:8px 0 6px; font-size:1.02rem; }
+  .how p { color:var(--muted); font-size:.85rem; line-height:1.65; }
+  .btn-ghost { background:var(--surface); border:1px solid var(--line); color:var(--ink); }
+  .btn-sm { padding:8px 16px; font-size:.8rem; border-radius:9px; }
+
+  /* ── karaoke sahne ── */
+  .stage {
+    margin-top:20px; aspect-ratio:16/9; border-radius:20px; overflow:hidden;
+    background:#181820; border:1px solid rgba(0,0,0,.2);
+    box-shadow:0 24px 70px rgba(22,22,30,.45);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+  }
+  #kMount { position:absolute; inset:0; }
+  .stage .idle { position:relative; z-index:5; color:#a8a8b4; padding:24px; }
+  .stage .idle .i { font-size:3rem; color:var(--a1); }
+  .stage .idle p { margin-top:8px; font-size:.9rem; }
+  #kShield { position:absolute; inset:0; z-index:2; cursor:pointer; }
+  .kmask {
+    position:absolute; inset:0 0 auto 0; height:58px; z-index:3; pointer-events:none;
+    background:linear-gradient(180deg, rgba(24,24,32,.95) 30%, rgba(24,24,32,0));
+    display:flex; align-items:flex-start; padding:8px 14px;
+    color:rgba(255,255,255,.4); font-size:.66rem; letter-spacing:3px; font-weight:800;
+  }
+  .kbar {
+    position:absolute; inset:auto 14px 14px 14px; z-index:4;
+    display:flex; align-items:center; gap:12px;
+    padding:10px 14px; border-radius:14px;
+    background:rgba(18,18,24,.78); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.12);
+  }
+  .kbar button {
+    padding:9px 20px; border-radius:10px; cursor:pointer; font-size:.82rem; font-weight:700;
+    background:var(--grad); border:none; color:#fff; white-space:nowrap;
+  }
+  .kbar button:hover { filter:brightness(1.1); }
+  .kbar #kFull { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); }
+  .kbar input[type=range] { flex:1 1 140px; accent-color:var(--a1); max-width:160px; }
+  #kMute { background:rgba(255,255,255,.08) !important; border:1px solid rgba(255,255,255,.16) !important; }
+  .vrow {
+    display:flex; align-items:center; gap:12px; margin-top:12px; max-width:560px;
+    background:var(--surface); border:1px solid var(--line-soft);
+    border-radius:12px; padding:10px 16px; color:var(--muted); font-size:.8rem; box-shadow:var(--shadow);
+  }
+  .vrow input[type=range] { flex:1; accent-color:var(--a1); }
+  .vrow button {
+    padding:7px 16px; border-radius:8px; cursor:pointer; font-size:.78rem; white-space:nowrap;
+    background:#faf8f4; border:1px solid var(--line); color:var(--ink);
+  }
+  .vrow button:hover { background:#f0ece4; }
+  .kbar .t { font-size:.78rem; color:#e8e4dc; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .nowplaying { margin-top:14px; color:var(--muted); font-size:.86rem; }
+  .nowplaying b { color:var(--ink); }
+
+  .catwrap { display:flex; gap:8px; flex-wrap:wrap; margin-top:18px; }
+  .cat {
+    padding:8px 16px; border-radius:999px; font-size:.83rem; cursor:pointer;
+    border:1px solid var(--line); background:var(--surface); color:var(--muted); transition:.2s;
+  }
+  .cat:hover { color:var(--ink); border-color:rgba(22,22,30,.3); }
+  .cat.on { background:var(--dark); border-color:transparent; color:#fff; font-weight:700; box-shadow:0 6px 16px rgba(22,22,30,.25); }
+  .cat.m { border-color:rgba(230,57,126,.35); color:var(--a3); }
+
+  .kl { color:var(--muted); font-size:.85rem; margin-top:24px; font-weight:600; letter-spacing:.03em; }
+  .songs { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-top:14px; }
+  .sk {
+    text-align:left; padding:0; border-radius:14px; cursor:pointer; overflow:hidden;
+    background:var(--surface); border:1px solid var(--line-soft); color:var(--ink);
+    transition:.18s; font-size:.9rem; box-shadow:var(--shadow);
+  }
+  .sk:hover { border-color:rgba(255,93,58,.5); transform:translateY(-3px); box-shadow:0 14px 32px rgba(255,93,58,.2); }
+  .sk.on { border-color:var(--a1); box-shadow:0 0 0 1px var(--a1), 0 14px 30px rgba(255,93,58,.22); }
+  .thumb { position:relative; aspect-ratio:16/9; background:#e8e4dc; }
+  .thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .25s; }
+  .sk:hover .thumb img { transform:scale(1.05); }
+  .thumb .g {
+    position:absolute; top:8px; left:8px; font-size:.66rem; font-weight:700; padding:3px 8px;
+    border-radius:999px; background:rgba(24,24,32,.75); color:#fff; backdrop-filter:blur(6px);
+  }
+  .sk .body { padding:10px 12px 12px; }
+  .sk .t { font-weight:700; font-size:.88rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sk .a { color:var(--a1); font-size:.78rem; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sk .x { color:#9c96a2; font-size:.72rem; margin-top:7px; display:inline-block; }
+  .sk .x:hover { color:var(--a3); }
+
+  /* ── oyun ── */
+  .scorebar { display:flex; gap:22px; margin-top:14px; color:var(--muted); font-size:.85rem; }
+  .scorebar b { color:var(--ink); }
+  .qstage {
+    position:relative; aspect-ratio:16/9; max-width:560px; border-radius:18px; overflow:hidden;
+    background:#181820; border:1px solid rgba(0,0,0,.2);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  #ytQ { position:absolute; inset:0; display:none; }
+  #ytQ iframe, #ytQ div { width:100%; height:100%; }
+  #ytQ.on { display:block; }
+  .coverhide {
+    position:absolute; inset:0; z-index:3; text-align:center; padding:20px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:
+      radial-gradient(420px 240px at 20% 20%, rgba(255,93,58,.18), transparent 70%),
+      radial-gradient(420px 240px at 80% 80%, rgba(230,57,126,.14), transparent 70%),
+      #181820;
+  }
+  .coverhide .q { font-size:2.6rem; color:#ff8a5c; font-weight:800; }
+  .coverhide p { color:#b3b0aa; margin-top:10px; font-size:.92rem; max-width:380px; }
+  .coverhide .dim { font-size:.78rem; color:#7d7a84; }
+  .eqbars { display:flex; align-items:flex-end; gap:5px; height:44px; margin-top:6px; }
+  .eqbars i {
+    width:7px; border-radius:3px; background:linear-gradient(180deg,#ff5d3a,#e6397e);
+    animation:eq .9s ease-in-out infinite;
+  }
+  .eqbars i:nth-child(2){ animation-delay:.15s; }
+  .eqbars i:nth-child(3){ animation-delay:.3s; }
+  .eqbars i:nth-child(4){ animation-delay:.45s; }
+  .eqbars i:nth-child(5){ animation-delay:.6s; }
+  @keyframes eq { 0%,100%{ height:12px; } 50%{ height:42px; } }
+  .opts { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; max-width:560px; }
+  .opt {
+    padding:14px 16px; border-radius:12px; background:var(--surface);
+    border:1px solid var(--line); color:var(--ink); cursor:pointer; text-align:left;
+    font-size:.92rem; transition:.15s; box-shadow:var(--shadow);
+  }
+  .opt:hover { border-color:var(--a1); background:rgba(255,93,58,.06); }
+  .opt.ok { background:rgba(34,197,94,.12); border-color:#22c55e; }
+  .opt.no { background:rgba(239,68,68,.1); border-color:#ef4444; }
+  .qnote { margin-top:14px; color:var(--muted); font-size:.88rem; }
+  .qnote b { color:var(--a1); }
+  .qnote a { color:var(--a3); }
+
+  footer { border-top:1px solid var(--line-soft); padding:34px; text-align:center; color:#a29ca8; font-size:.8rem; }
+
+  /* ── karanlık tema ── */
+  #themeBtn {
+    width:34px; height:34px; border-radius:999px; cursor:pointer; font-size:.9rem;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; flex:none; transition:.2s;
+  }
+  #themeBtn:hover { transform:rotate(15deg); }
+  html[data-theme="dark"] {
+    --bg:#131318; --surface:#1c1c24; --ink:#f0eee9; --muted:#a09caa;
+    --line:rgba(255,255,255,.12); --line-soft:rgba(255,255,255,.07);
+    --dark:#f0eee9; --shadow:0 12px 32px rgba(0,0,0,.45);
+  }
+  html[data-theme="dark"] body {
+    background:
+      radial-gradient(1000px 500px at 92% -10%, rgba(255,93,58,.13), transparent 70%),
+      radial-gradient(800px 420px at -8% 0%, rgba(230,57,126,.09), transparent 70%),
+      var(--bg);
+  }
+  html[data-theme="dark"] nav { background:rgba(19,19,24,.82); }
+  html[data-theme="dark"] .nt.on, html[data-theme="dark"] .cat.on {
+    color:#16161e; box-shadow:0 8px 20px rgba(0,0,0,.5);
+  }
+  html[data-theme="dark"] .field input, html[data-theme="dark"] .field select { background:#23232c; color:var(--ink); }
+  html[data-theme="dark"] .vrow button { background:#23232c; color:var(--ink); }
+  html[data-theme="dark"] .vrow button:hover, html[data-theme="dark"] .btn.ghost:hover { background:#2b2b35; }
+  html[data-theme="dark"] .thumb { background:#23232c; }
+  html[data-theme="dark"] .qnote a { color:#ff8a5c; }
+
+  @media(max-width:640px){
+    nav { padding:11px 14px; }
+    .page { padding:86px 14px 40px; }
+    .opts { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">NAKA<em>RAT</em></div>
+  <div class="tabs">
+    <button class="nt on" data-p="home">Ana Sayfa</button>
+    <button class="nt" data-p="kara">Karaoke</button>
+    <button class="nt" data-p="oyun">Dinle &amp; Bil</button>
+  </div>
+  <button id="themeBtn" title="Karanlık tema">🌙</button>
+</nav>
+
+<!-- ═══════════ ANA SAYFA ═══════════ -->
+<div class="page on" id="p-home">
+  <div class="homehero">
+    <div class="badge">Sözler ekranda akar · Parçayı dinle, bul, kazan</div>
+    <h1>Mikrofonu al,<br><span>NAKARAT zamanı.</span></h1>
+    <p class="lead">
+      Sevdiğin şarkılar karaoke sahnesinde sözler ekranında akarak çalıyor;
+      oynatıcı tamamen senin elinde. Sonra dinle-bil oyunuyla hafızanı test et.
+    </p>
+    <div class="ctarow">
+      <button class="btn" onclick="goTo('kara')">Karaoke Sahnesi</button>
+      <button class="btn ghost" onclick="goTo('oyun')">Dinle &amp; Bil Oyunu</button>
+    </div>
+    <div class="stats" id="homeStats"></div>
+  </div>
+
+  <div class="sec-head"><h2>Sahnenin favorileri</h2><a href="#" style="color:var(--a1);font-size:.85rem;text-decoration:none;font-weight:700;" onclick="goTo('kara');return false;">Tümünü gör →</a></div>
+  <div class="songs" id="homeSongs"></div>
+
+  <div class="sec-head" style="margin-top:44px;"><h2>Nasıl çalışır?</h2></div>
+  <div class="howto">
+    <div class="how">
+      <div class="n">01 — SAHNE</div>
+      <b>Karaoke</b>
+      <p>Şarkıyı seç, oynatıcıyı sen yönet: durdur, ilerlet, tam ekran. Resmi karaoke videolarında sözler ekranda akar.</p>
+    </div>
+    <div class="how">
+      <div class="n">02 — OYUN</div>
+      <b>Dinle &amp; Bil</b>
+      <p>Rastgele bir şarkıdan 12 saniyelik parça çalar. Video saklanır, sadece ses eşliğinde 4 şıktan doğruyu bulursun.</p>
+    </div>
+    <div class="how">
+      <div class="n">03 — HAVUZ</div>
+      <b>Kendi şarklarını ekle</b>
+      <p>YouTube'da "şarkı adı + karaoke" ya da "lyrics" ara, linki yapıştır — hem karaoke listesine hem oyuna girsin.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ KARAOKE ═══════════ -->
+<div class="page" id="p-kara">
+  <h1 class="big">Karaoke</h1>
+  <p class="sub">Sözler ekranda akar — resmi karaoke &amp; lyrics videoları YouTube'dan canlı oynar. Şarkıyı seç, mikrofonu al.</p>
+
+  <div class="stage" id="stage">
+    <div class="idle" id="kIdle"><div class="i">♪</div><p>Aşağıdan bir şarkı seç — sahne buraya kurulacak.</p></div>
+    <div id="kMount"></div>
+    <div id="kShield"></div>
+    <div class="kmask">NAKARAT</div>
+    <div class="kbar" id="kBar" style="display:none;">
+      <button id="kToggle">Oynat</button>
+      <input type="range" id="kSeek" min="0" max="1000" value="0">
+      <span class="t" id="kTime">0:00 / 0:00</span>
+      <button id="kMute">Ses</button>
+      <input type="range" id="kVol" min="0" max="100" value="50" title="Ses seviyesi">
+      <button id="kFull">Tam ekran</button>
+    </div>
+  </div>
+  <div class="nowplaying" id="now">Sahne boş. · İpucu: videoya tıkla = oynat/duraklat, çift tık = tam ekran</div>
+
+  <div class="catwrap" id="kLangs">
+    <button class="cat on" data-l="mix">Karışık</button>
+    <button class="cat" data-l="tr">Türkçe</button>
+    <button class="cat" data-l="gl">Yabancı</button>
+  </div>
+
+  <div class="kl" id="sayi"></div>
+  <div class="songs" id="songs"></div>
+
+  <div class="panel">
+    <b style="font-size:.95rem;">＋ Sahneye şarkı ekle</b>
+    <p class="note-ish" style="margin:6px 0 4px;">YouTube'da "şarkı adı + karaoke" ya da "lyrics" ara, linksini buraya yapıştır — listene girsin.</p>
+    <div class="field">
+      <input id="nT" placeholder="Şarkı adı">
+      <input id="nA" placeholder="Sanatçı">
+      <input id="nU" placeholder="https://www.youtube.com/watch?v=…">
+      <select id="nL"><option value="tr">Türkçe</option><option value="gl">Yabancı</option></select>
+      <button class="btn" id="kAdd">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ OYUN ═══════════ -->
+<div class="page" id="p-oyun">
+  <h1 class="big">Dinle &amp; Bil</h1>
+  <p class="sub">12 saniye dinle, hangi şarkı olduğunu bul. Kategoriler: Türkçe / Yabancı · Pop / Rap / Rock.</p>
+
+  <div class="catwrap" id="langs">
+    <button class="cat on" data-l="mix">Karışık</button>
+    <button class="cat" data-l="tr">Türkçe</button>
+    <button class="cat" data-l="gl">Yabancı</button>
+  </div>
+  <div class="catwrap" id="genres">
+    <button class="cat on m" data-g="all">Tüm türler</button>
+    <button class="cat m" data-g="pop">Pop</button>
+    <button class="cat m" data-g="rap">Rap</button>
+    <button class="cat m" data-g="rock">Rock</button>
+  </div>
+
+  <div class="scorebar">
+    <span>Puan: <b id="score">0</b></span>
+    <span>Seri: <b id="streak">0</b></span>
+    <span>Soru: <b id="qNum">0</b></span>
+    <span>Rekor: <b id="hi">0</b></span>
+  </div>
+
+  <div class="qstage" id="qHead">
+    <div id="ytQ"><div id="ytQFrame"></div></div>
+    <div class="coverhide" id="cover">
+      <div class="q">♪</div>
+      <p>Aşağıdaki düğmeye bas — 12 saniye dinle, sonra tahmin et.</p>
+      <button class="btn" style="margin-top:14px;" onclick="listen()">Dinle</button>
+    </div>
+  </div>
+  <div class="vrow">
+    <span>Ses</span>
+    <input type="range" id="qVol" min="0" max="100" value="50">
+    <button id="qMute">Sessiz</button>
+  </div>
+  <div class="vrow" id="qCtrl" style="display:none;">
+    <button id="qPBtn">Durdur</button>
+    <input type="range" id="qProg" min="0" max="12" step="0.1" value="0">
+    <span id="qLeft">0:12</span>
+    <button id="qAgain">Tekrar dinle</button>
+  </div>
+  <div class="opts" id="opts"></div>
+  <div class="qnote" id="qNote"></div>
+
+  <div class="panel">
+    <b style="font-size:.95rem;">＋ Oyuna sorun ekle</b>
+    <p class="note-ish" style="margin:6px 0 4px;">Şarkının YouTube linksini yapıştır — havuza girer. (Ceza, Sagopa, ne istersen.)</p>
+    <div class="field">
+      <input id="gU" placeholder="YouTube linki">
+      <input id="gT" placeholder="Şarkı adı">
+      <input id="gA" placeholder="Sanatçı">
+      <select id="gL"><option value="tr">Türkçe</option><option value="gl">Yabancı</option></select>
+      <select id="gG"><option value="pop">Pop</option><option value="rap">Rap</option><option value="rock">Rock</option></select>
+      <button class="btn" id="gAdd">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<footer>NAKARAT · sözler ve müzikler YouTube resmi videolarından canlı oynar · eklediklerin yalnızca senin tarayıcında saklanır</footer>
+
+<script>
+/* ═══════ ortak ═══════ */
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const ytId=u=>{const m=String(u).match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null;};
+
+/* ═══════ sekme geçişi ═══════ */
+function goTo(p){
+  document.querySelectorAll(".nt").forEach(x=>x.classList.toggle("on", x.dataset.p===p));
+  document.querySelectorAll(".page").forEach(pg=>pg.classList.toggle("on", pg.id==="p-"+p));
+  window.scrollTo({top:0});
+}
+function renderHome(){
+  document.getElementById("homeStats").innerHTML = [
+    { n:karaoke.length, t:"karaoke şarkısı" },
+    { n:pool.length, t:"oyun sorusu" },
+    { n:karaoke.filter(x=>x.l==="tr").length, t:"Türkçe şarkı" },
+    { n:+(localStorage.getItem("nakaratHi")||0), t:"rekor puanın" },
+  ].map(s=>`<div class="stat"><b>${s.n}</b><span>${s.t}</span></div>`).join("");
+  const favs=karaoke.slice(0,6);
+  document.getElementById("homeSongs").innerHTML = favs.map(x=>`
+    <button class="sk">
+      <div class="thumb">
+        <img src="https://i.ytimg.com/vi/${x.v}/mqdefault.jpg" alt="" loading="lazy">
+        <span class="g">${x.l==="tr"?"Türkçe":"Yabancı"}</span>
+      </div>
+      <div class="body">
+        <div class="t">${esc(x.t)}</div>
+        <div class="a">${esc(x.a)}</div>
+      </div>
+    </button>`).join("");
+  [...document.querySelectorAll("#homeSongs .sk")].forEach((b,i)=>{
+    b.onclick=()=>{ const s=favs[i]; goTo("kara"); startKaraoke(s.t,s.a,s.v); };
+  });
+}
+document.querySelectorAll(".nt").forEach(b=>b.onclick=()=>goTo(b.dataset.p));
+
+/* ═══════ KARAOKE ═══════ */
+
+let karaoke = JSON.parse(localStorage.getItem("nakaratKaraokeV7")||"null") || [
+  { v:"ynFWktu90fc", t:"Kuzu Kuzu",             a:"Tarkan",        l:"tr" },
+  { v:"IH2liCEJJmE", t:"Dudu",                  a:"Tarkan",        l:"tr" },
+  { v:"frYrLJYi08A", t:"Şımarık",               a:"Tarkan",        l:"tr" },
+  { v:"d0nSRsYgc40", t:"Şıkıdım",               a:"Tarkan",        l:"tr" },
+  { v:"WtppbcjShZY", t:"Öp",                    a:"Tarkan",        l:"tr" },
+  { v:"QI-K-YgMp64", t:"Hüp",                   a:"Tarkan",        l:"tr" },
+  { v:"B1JvJsh3Nto", t:"Çakkıdı",               a:"Kenan Doğulu",  l:"tr" },
+  { v:"wTJA_w-9Aqs", t:"Vay Be",                a:"Kenan Doğulu",  l:"tr" },
+  { v:"wa06HHpGfhs", t:"Firuze",                a:"Sezen Aksu",    l:"tr" },
+  { v:"wGM8rX-ZLvs", t:"Ben de Yoluma Giderim", a:"Sezen Aksu",    l:"tr" },
+  { v:"K9lzTRoT318", t:"Hadi Bakalım",           a:"Sezen Aksu",    l:"tr" },
+  { v:"O-R_Rx96_qU", t:"Vay",                    a:"Sezen Aksu",    l:"tr" },
+  { v:"g_nFqExPYkE", t:"Unuttun mu Beni",        a:"Sezen Aksu",    l:"tr" },
+  { v:"LVyYpVy0Meo", t:"Tükeneceğiz",           a:"Sezen Aksu",    l:"tr" },
+  { v:"ng2ZW2d7HHM", t:"Ah Yıllar",             a:"Sezen Aksu",    l:"tr" },
+  { v:"v4-3DNPUfwg", t:"Her Şeyi Yak",           a:"Duman",         l:"tr" },
+  { v:"3bC9HYi-W1s", t:"Bu Akşam",              a:"Duman",         l:"tr" },
+  { v:"roig8ST5HS4", t:"Kibir",                  a:"Hande Yener",   l:"tr" },
+  { v:"bZ7_kQS_nOs", t:"Romeo",                  a:"Hande Yener",   l:"tr" },
+  { v:"5U4vMwHgQF0", t:"Yoksa Mani",             a:"Hande Yener",   l:"tr" },
+  { v:"l_8DqVgLRAw", t:"Marlon Brando",          a:"Zeynep Bastık", l:"tr" },
+  { v:"EeXCzfiAaVM", t:"Bir Daha",               a:"Zeynep Bastık", l:"tr" },
+  { v:"9UgohPoBaqQ", t:"Başa Bela",              a:"Ezhel",         l:"tr" },
+  { v:"sDdZXy6odM0", t:"AYA",                    a:"Murda & Ezhel", l:"tr" },
+  { v:"QAutTySqz9A", t:"Holocaust",              a:"Ceza",          l:"tr" },
+  { v:"F-p2BQ4H1nA", t:"Lose Yourself",         a:"Eminem",        l:"gl" },
+  { v:"xyF04rAhHaQ", t:"Bohemian Rhapsody",     a:"Queen",         l:"gl" },
+  { v:"f41XKolO1CM", t:"Levitating",            a:"Dua Lipa",      l:"gl" },
+  { v:"5QBn1B-6cPc", t:"Perfect",               a:"Ed Sheeran",    l:"gl" },
+  { v:"rI5HNCgpWNo", t:"Shape of You",          a:"Ed Sheeran",    l:"gl" },
+  { v:"CJL_n-oYBfI", t:"Viva La Vida",          a:"Coldplay",      l:"gl" },
+  { v:"ZnWO-Wkqlm8", t:"Believer",              a:"Imagine Dragons",l:"gl" },
+  { v:"Q_-fSpXA_Fo", t:"Counting Stars",        a:"OneRepublic",   l:"gl" },
+  { v:"CXvb-_zftZk", t:"Wonderwall",            a:"Oasis",         l:"gl" },
+  { v:"MsH7a8prsA8", t:"Zombie",                a:"The Cranberries",l:"gl" },
+  { v:"PodWwt1jDAg", t:"Blinding Lights",       a:"The Weeknd",    l:"gl" },
+  { v:"5NMUXgaZBBo", t:"bad guy",               a:"Billie Eilish", l:"gl" },
+  { v:"DIC1AzEgnnw", t:"Just The Way You Are",  a:"Bruno Mars",    l:"gl" },
+  { v:"rMSQwIp4Jg8", t:"Someone Like You",      a:"Adele",         l:"gl" },
+];
+let kLang = "mix", kSel = null;
+const saveK=()=>localStorage.setItem("nakaratKaraokeV7",JSON.stringify(karaoke));
+
+document.querySelectorAll("#kLangs .cat").forEach(b=>b.onclick=()=>{
+  kLang=b.dataset.l;
+  document.querySelectorAll("#kLangs .cat").forEach(x=>x.classList.toggle("on",x===b));
+  renderSongs();
+});
+
+function renderSongs(){
+  const list = kLang==="mix"? karaoke : karaoke.filter(x=>x.l===kLang);
+  document.getElementById("sayi").textContent = `Sahnede ${list.length} şarkı var`;
+  document.getElementById("songs").innerHTML = list.map(x=>`
+    <button class="sk ${kSel===x.v?"on":""}">
+      <div class="thumb">
+        <img src="https://i.ytimg.com/vi/${x.v}/mqdefault.jpg" alt="" loading="lazy">
+        <span class="g">${x.l==="tr"?"Türkçe":"Yabancı"}</span>
+      </div>
+      <div class="body">
+        <div class="t">${esc(x.t)}</div>
+        <div class="a">${esc(x.a)}</div>
+        ${x.own?`<div class="x" data-v="${x.v}">listeden çıkar</div>`:""}
+      </div>
+    </button>`).join("");
+  const btns=[...document.querySelectorAll(".sk")];
+  btns.forEach((b,i)=>b.onclick=e=>{
+    if(e.target.classList.contains("x")){
+      karaoke=karaoke.filter(y=>y.v!==b.querySelector(".x").dataset.v);
+      saveK(); renderSongs(); return;
+    }
+    const s=list[i];
+    startKaraoke(s.t,s.a,s.v);
+  });
+}
+
+function startKaraoke(t,a,v){
+  kSel=v;
+  document.getElementById("kIdle").style.display = v? "none":"flex";
+  document.getElementById("kBar").style.display = v? "flex":"none";
+  kToggle.textContent = "Oynat";
+  document.getElementById("now").innerHTML = v
+    ? `Şimdi sahnede: <b>${esc(t)}</b> — ${esc(a)} · sözleri ekrandan takip et`
+    : "Sahne boş. · Videoya tıkla = oynat/duraklat · çift tık = tam ekran";
+  if(!v) return;
+  kPending = v;
+  if(kReady){ kPlayer.loadVideoById({videoId:v}); kPlayer.playVideo(); }
+}
+
+document.getElementById("kAdd").onclick=()=>{
+  const v=ytId(nU.value.trim());
+  if(!v||!nT.value.trim()||!nA.value.trim()) return alert("Şarkı adı + sanatçı + geçerli YouTube linki gerekli.");
+  karaoke.unshift({ v, t:nT.value.trim(), a:nA.value.trim(), l:nL.value, own:true });
+  saveK(); nT.value=nA.value=nU.value=""; renderSongs(); renderHome();
+};
+renderSongs();
+
+/* ═══════ OYUN ═══════ */
+const QK="nakaratQuizV3", HK="nakaratHi";
+let pool = JSON.parse(localStorage.getItem("nakaratQuizV3")||"null") || [
+  { v:"NAHRpEqgcL4", t:"Kuzu Kuzu",         a:"Tarkan",    l:"tr", g:"pop",  s:30 },
+  { v:"mq_ReSbqX7E", t:"Firuze",            a:"Sezen Aksu",l:"tr", g:"pop",  s:35 },
+  { v:"iurfbuXpqXM", t:"Geceler",           a:"Ezhel",     l:"tr", g:"rap",  s:15 },
+  { v:"c9r1Vfb51X8", t:"Şımarık",           a:"Tarkan",    l:"tr", g:"pop",  s:25 },
+  { v:"Hrf7F3QAfvE", t:"İmkansızım",        a:"Ezhel",     l:"tr", g:"rap",  s:20 },
+  { v:"eRhEcKHU5LY", t:"Lose Yourself",     a:"Eminem",    l:"gl", g:"rap",  s:40 },
+  { v:"TUVcZfQe-Kw", t:"Levitating",        a:"Dua Lipa",  l:"gl", g:"pop",  s:30 },
+  { v:"fJ9rUzIMcZQ", t:"Bohemian Rhapsody", a:"Queen",     l:"gl", g:"rock", s:8  },
+  { v:"5NV6Rdv1a3I", t:"Get Lucky",         a:"Daft Punk", l:"gl", g:"pop",  s:30 },
+  { v:"JGwWNGJdvx8", t:"Shape of You",      a:"Ed Sheeran",l:"gl", g:"pop",  s:45 },
+  { v:"dvgZkm1xWPE", t:"Viva La Vida",      a:"Coldplay",  l:"gl", g:"rock", s:20 },
+  { v:"7wtfhZwyrcc", t:"Believer",          a:"Imagine Dragons",l:"gl", g:"rock", s:30 },
+  { v:"YQHsXMglC9A", t:"Hello",             a:"Adele",     l:"gl", g:"pop",  s:35 },
+];
+let lang="mix", genre="all", score=0, streak=0, qn=0, cur=null, lock=false;
+const saveQ=()=>localStorage.setItem("nakaratQuizV3",JSON.stringify(pool));
+
+document.querySelectorAll("#langs .cat").forEach(b=>b.onclick=()=>{
+  lang=b.dataset.l;
+  document.querySelectorAll("#langs .cat").forEach(x=>x.classList.toggle("on",x===b));
+  nextQ();
+});
+document.querySelectorAll("#genres .cat").forEach(b=>b.onclick=()=>{
+  genre=b.dataset.g;
+  document.querySelectorAll("#genres .cat").forEach(x=>x.classList.toggle("on",x===b));
+  nextQ();
+});
+
+/* YouTube IFrame API — karaoke oynatıcısı + oyun parçacığı */
+let player=null, ytReady=false, qAcc=null;
+let kPlayer=null, kReady=false, kPending=null, kTimer=null, shownDur=0;
+const tag=document.createElement("script");
+tag.src="https://www.youtube.com/iframe_api";
+document.head.appendChild(tag);
+
+function fmt(s){ s=Math.max(0,Math.floor(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
+
+window.onYouTubeIframeAPIReady=()=>{
+  /* karaoke sahne oynatıcısı — kendi kumandamızla */
+  kPlayer=new YT.Player("kMount",{
+    width:"100%", height:"100%",
+    playerVars:{rel:0, controls:0, modestbranding:1, iv_load_policy:3, playsinline:1, fs:0},
+    events:{
+      onReady:()=>{
+        kReady=true;
+        applyVol();
+        if(kPending){ kPlayer.loadVideoById({videoId:kPending}); kPlayer.playVideo(); }
+      },
+      onStateChange:e=>{
+        kToggle.textContent = e.data===YT.PlayerState.PLAYING ? "Durdur" : "Oynat";
+        if(e.data===YT.PlayerState.PLAYING){
+          kBar.style.display="flex";
+          clearInterval(kTimer);
+          kTimer=setInterval(()=>{
+            try{
+              const d=kPlayer.getDuration()||0, c=kPlayer.getCurrentTime()||0;
+              if(d){ shownDur=d; kSeek.value=Math.round(c/d*1000); }
+              kTime.textContent=fmt(c)+" / "+fmt(d);
+            }catch(_){}
+          },250);
+        }
+        if(e.data===YT.PlayerState.ENDED) clearInterval(kTimer);
+      }
+    }
+  });
+  /* oyun parçacık oynatıcısı — kullanıcı kontrolü: durdur/devam/tekrar */
+  player=new YT.Player("ytQFrame",{
+    width:"100%", height:"100%",
+    playerVars:{rel:0,playsinline:1,controls:0},
+    events:{ onStateChange:e=>{
+      if(e.data===YT.PlayerState.PLAYING){
+        qPBtn.textContent="Durdur";
+        clearInterval(qAcc);
+        qAcc=setInterval(()=>{
+          try{
+            const p=Math.max(0,(player.getCurrentTime()||0)-(cur?.s||0));
+            qProg.value=Math.min(12,p);
+            qLeft.textContent="0:"+String(Math.max(0,12-p).toFixed(1)).slice(0,4);
+            if(p>=12){
+              clearInterval(qAcc);
+              player.pauseVideo();
+              qLeft.textContent="0:00";
+              qPBtn.textContent="Devam";
+              qNote.innerHTML='<b>Parça 12 saniyede durduruldu.</b> Tekrar dinleyebilir veya tahmin edebilirsin. &nbsp;·&nbsp; <a href="#" onclick="nextQ();return false;">Sıradaki →</a>';
+            }
+          }catch(_){}
+        },100);
+      } else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.ENDED){
+        clearInterval(qAcc);
+        qPBtn.textContent = e.data===YT.PlayerState.PAUSED ? "Devam" : "Oynat";
+      }
+    }}
+  });
+  ytReady=true;
+  setTimeout(applyVol,300);
+};
+
+/* karaoke kumanda etkileşimleri */
+/* ── ses kontrolü (iki bölümde de) ── */
+let vol = +(localStorage.getItem("nakaratVol") ?? 50);
+let muted = localStorage.getItem("nakaratMute")==="1";
+function applyVol(){
+  try{ kPlayer && kPlayer.setVolume && kPlayer.setVolume(muted?0:vol); }catch(_){}
+  try{ player && player.setVolume && player.setVolume(muted?0:vol); }catch(_){}
+  kVol.value=vol; qVol.value=vol;
+  kMute.textContent = muted ? "Sessiz" : "Ses";
+  qMute.textContent = muted ? "Sesi Aç" : "Sessiz";
+}
+[[kVol,"karaoke"],[qVol,"oyun"]].forEach(([el,src])=>el.addEventListener("input",()=>{
+  vol=+el.value; muted=false;
+  localStorage.setItem("nakaratVol",vol); localStorage.setItem("nakaratMute","0");
+  applyVol();
+}));
+[[kMute],[qMute]].forEach(([el])=>el.addEventListener("click",()=>{
+  muted=!muted; localStorage.setItem("nakaratMute",muted?"1":"0"); applyVol();
+}));
+applyVol();
+
+function togglePlay(){
+  if(!kPlayer||!kPending||!kReady) return;
+  try{
+    const st = kPlayer.getPlayerState();
+    if(st===YT.PlayerState.PLAYING || st===YT.PlayerState.BUFFERING) kPlayer.pauseVideo();
+    else { kPlayer.playVideo(); kToggle.textContent="Durdur"; }
+  }catch(_){}
+}
+kToggle.addEventListener("click", ()=>togglePlay());
+kSeek.addEventListener("input", ()=>{
+  try{ if(shownDur) kPlayer.seekTo(kSeek.value/1000*shownDur, true); }catch(_){}
+});
+kFull.addEventListener("click", ()=>{
+  const s=document.getElementById("stage");
+  if(document.fullscreenElement) document.exitFullscreen();
+  else s.requestFullscreen&&s.requestFullscreen();
+});
+kShield.addEventListener("contextmenu", e=>e.preventDefault());
+kShield.addEventListener("click", ()=>togglePlay());
+kShield.addEventListener("dblclick", ()=>{
+  const s=document.getElementById("stage");
+  if(document.fullscreenElement) document.exitFullscreen();
+  else s.requestFullscreen&&s.requestFullscreen();
+});
+
+function nextQ(){
+  try{ clearInterval(qAcc); }catch(_){}
+  qPBtn.textContent="Durdur"; qProg.value=0; qLeft.textContent="0:12";
+  document.getElementById("qCtrl").style.display="none";
+  lock=false;
+  document.getElementById("ytQ").classList.remove("on");
+  buildCover();
+  document.getElementById("qNote").innerHTML="";
+  document.getElementById("opts").innerHTML="";
+
+  let list = lang==="mix"? pool : pool.filter(x=>x.l===lang);
+  if(genre!=="all"){ const g=list.filter(x=>x.g===genre); if(g.length>=4) list=g; }
+  if(list.length<4){
+    document.getElementById("qNote").innerHTML="<b>Bu kategoride yeterli soru yok</b> — aşağıdan kendi sorunuzu ekleyin.";
+    return;
+  }
+  cur=list[Math.floor(Math.random()*list.length)];
+  const others=pool.filter(x=>x.v!==cur.v).sort(()=>Math.random()-.5).slice(0,3);
+  const usage=[cur,...others].sort(()=>Math.random()-.5);
+  qn++; document.getElementById("qNum").textContent=qn;
+  document.getElementById("opts").innerHTML=usage.map(o=>
+    `<button class="opt" data-v="${o.v}">${esc(o.t)} — ${esc(o.a)}</button>`).join("");
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(b));
+}
+
+function buildCover(){
+  const c=document.getElementById("cover");
+  c.style.display="flex";
+  c.innerHTML=`<div class="q">♪</div><p>Sakın bakma, sadece dinle — parça çalınca 4 şıktan hangisi olduğunu bul.</p><button class="btn" style="margin-top:14px;" onclick="listen()">Dinle</button>`;
+}
+function listen(){
+  if(!cur) return;
+  if(!ytReady) return setTimeout(listen,300);
+  document.getElementById("ytQ").classList.add("on");
+  document.getElementById("qCtrl").style.display="flex";
+  qPBtn.textContent="Durdur"; qProg.value=0; qLeft.textContent="0:12";
+  const c=document.getElementById("cover");
+  c.innerHTML=`<div class="eqbars"><i></i><i></i><i></i><i></i><i></i></div><p><b>Dinliyorsun…</b></p><p class="dim">Duraklatmak için kumandadaki düğmeyi kullan — tahmin için şıkları seç.</p>`;
+  player.loadVideoById({videoId:cur.v, startSeconds:cur.s||0});
+  player.playVideo();
+}
+window.listen=listen;
+
+/* oyun kumandası: durdur / devam / tekrar / konuşluk atla */
+function qToggle(){
+  if(!cur||!ytReady) return;
+  try{
+    const st=player.getPlayerState();
+    if(st===YT.PlayerState.PLAYING || st===YT.PlayerState.BUFFERING){ player.pauseVideo(); qPBtn.textContent="Devam"; }
+    else { player.playVideo(); qPBtn.textContent="Durdur"; }
+  }catch(_){}
+}
+qPBtn.addEventListener("click", qToggle);
+qAgain.addEventListener("click", ()=>{
+  if(!cur) return;
+  try{ player.seekTo(cur.s||0, true); player.playVideo(); qPBtn.textContent="Durdur"; }catch(_){}
+});
+qProg.addEventListener("input", ()=>{
+  if(!cur) return;
+  try{ player.seekTo((cur.s||0)+ +qProg.value, true); }catch(_){}
+});
+
+function answer(btn){
+  if(lock) return; lock=true;
+  try{player.pauseVideo();}catch(_){}
+  try{clearInterval(qAcc);}catch(_){}
+  document.getElementById("qCtrl").style.display="none";
+  document.getElementById("cover").style.display="none";
+  const ok=btn.dataset.v===cur.v;
+  btn.classList.add(ok?"ok":"no");
+  if(!ok){
+    document.querySelectorAll(".opt").forEach(b=>{
+      if(b.dataset.v===cur.v) b.classList.add("ok");
+    });
+    streak=0;
+  } else { score+=100; streak++; }
+  document.getElementById("score").textContent=score;
+  document.getElementById("streak").textContent=streak;
+  const hi=Math.max(score, +(localStorage.getItem(HK)||0));
+  localStorage.setItem(HK,hi);
+  document.getElementById("hi").textContent=hi;
+  document.getElementById("qNote").innerHTML =
+    (ok? '<b style="color:#22c55e;">Doğru!</b> +100 &nbsp;·&nbsp; ' : 'Doğru cevap: ')
+    + `<b>${esc(cur.t)} — ${esc(cur.a)}</b>`
+    + ` &nbsp;·&nbsp; <a href="#" onclick="nextQ();return false;">Sıradaki →</a>`;
+}
+
+document.getElementById("gAdd").onclick=()=>{
+  const v=ytId(gU.value.trim());
+  if(!v||!gT.value.trim()||!gA.value.trim()) return alert("Video linki + şarkı adı + sanatçı gerekli.");
+  pool.push({ v, t:gT.value.trim(), a:gA.value.trim(), l:gL.value, g:gG.value, s:0, own:true });
+  saveQ(); gU.value=gT.value=gA.value=""; renderHome(); nextQ();
+};
+
+/* ═══════tema ═══════ */
+const TB=document.getElementById("themeBtn");
+function setTheme(t){
+  document.documentElement.dataset.theme=t;
+  TB.textContent = t==="dark" ? "☀️" : "🌙";
+  localStorage.setItem("nakaratTheme", t);
+}
+setTheme(localStorage.getItem("nakaratTheme")||"light");
+TB.onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+
+/* başlat */
+document.getElementById("hi").textContent=localStorage.getItem(HK)||0;
+renderHome();
+nextQ();
+</script>
+</body>
+</html>
